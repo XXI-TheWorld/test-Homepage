@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinkPage</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #FFFFFF;
+      --text-primary: #1A1A1A;
+      --text-secondary: #666666;
+      --border: #E0E0E0;
+      --hover-bg: #F5F5F5;
+      /* Wood-grain colors */
+      --wood-dark: #6B5344;
+      --wood-main: #8B7355;
+      --wood-light: #A08060;
+      /* Gold accent */
+      --gold: #D4AF37;
+      /* Dark mode colors */
+      --bg-dark: #1A1A1A;
+      --text-primary-dark: #F5F5F5;
+      --text-secondary-dark: #999999;
+      --border-dark: #333333;
+      --hover-bg-dark: #2A2A2A;
+    }
+
+    [data-theme="dark"] {
+      --bg: var(--bg-dark);
+      --text-primary: var(--text-primary-dark);
+      --text-secondary: var(--text-secondary-dark);
+      --border: var(--border-dark);
+      --hover-bg: var(--hover-bg-dark);
+    }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-weight: 400;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      transition: background-color 0.3s, color 0.3s;
+      position: relative;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 32px;
+    }
+
+    .header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      gap: 16px;
+      padding-bottom: 8px;
+    }
+
+    .avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 3px solid var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      font-weight: 300;
+      background: transparent;
+    }
+
+    .name {
+      font-size: 1.5rem;
+      font-weight: 400;
+    }
+
+    .bio {
+      font-size: 0.875rem;
+      font-weight: 300;
+      color: var(--text-secondary);
+      text-align: center;
+      line-height: 1.6;
+      transition: color 0.3s;
+    }
+
+    .prompt {
+      font-size: 0.75rem;
+      font-weight: 300;
+      color: var(--text-secondary);
+      transition: color 0.3s;
+    }
+
+    .links {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .link-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      height: 52px;
+      padding: 0 16px;
+      background: var(--bg);
+      border: 2px solid transparent;
+      background:
+        linear-gradient(var(--bg), var(--bg)) padding-box,
+        linear-gradient(90deg, var(--wood-dark), var(--wood-main), var(--wood-light), var(--wood-main), var(--wood-dark)) border-box;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.9375rem;
+      font-weight: 400;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+
+    .link-btn:hover {
+      background: var(--hover-bg);
+    }
+
+    .link-btn svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    /* Sakura Petal Animation */
+    .sakura-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .sakura-petal {
+      position: absolute;
+      top: -20px;
+      width: 12px;
+      height: 12px;
+      background: rgba(255, 182, 193, 0.6);
+      border-radius: 50% 0 50% 50%;
+      will-change: transform;
+      animation: fall linear infinite;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(-20px) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0.6;
+      }
+    }
+
+    @keyframes sway {
+      0%, 100% {
+        margin-left: 0;
+      }
+      50% {
+        margin-left: 30px;
+      }
+    }
+
+    /* Theme Toggle Button */
+    .theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      transition: all 0.3s;
+      z-index: 100;
+    }
+
+    .theme-toggle:hover {
+      background: var(--hover-bg);
+    }
+
+    /* Music Control Button */
+    .music-control {
+      position: fixed;
+      bottom: 60px;
+      right: 16px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+      z-index: 100;
+    }
+
+    .music-control:hover {
+      background: var(--hover-bg);
+    }
+
+    /* Visit Counter */
+    .visit-counter {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      transition: color 0.3s;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--text-primary);
+      color: var(--bg);
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      z-index: 200;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    /* WeChat Button */
+    .wechat-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      height: 52px;
+      padding: 0 16px;
+      background: var(--bg);
+      border: 2px solid transparent;
+      background:
+        linear-gradient(var(--bg), var(--bg)) padding-box,
+        linear-gradient(90deg, var(--wood-dark), var(--wood-main), var(--wood-light), var(--wood-main), var(--wood-dark)) border-box;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.9375rem;
+      font-weight: 400;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .wechat-btn:hover {
+      background: var(--hover-bg);
+    }
+
+    .wechat-btn svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    @media (min-width: 768px) {
+      body {
+        padding: 48px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sakura-container" id="sakura"></div>
+
+  <!-- Theme Toggle -->
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    ☀
+  </button>
+
+  <!-- Music Control -->
+  <button class="music-control" id="musicControl" aria-label="Toggle music">
+    ▶
+  </button>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">已复制 ✓</div>
+
+  <!-- Audio Element -->
+  <audio id="bgMusic" loop>
+    <source src="file:///D:/youxi/Sakura.mp3" type="audio/mpeg">
+  </audio>
+
+  <main class="container">
+    <header class="header">
+      <div class="avatar">TW</div>
+      <h1 class="name">The World</h1>
+      <p class="bio">欢迎来到我的主页</p>
+    </header>
+
+    <p class="prompt">// connect</p>
+
+    <nav class="links">
+      <!-- WeChat Copy Button -->
+      <button class="wechat-btn" id="wechatCopy">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 01.213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 00.167-.054l1.903-1.114a.864.864 0 01.717-.098 10.16 10.16 0 002.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178A1.17 1.17 0 014.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178 1.17 1.17 0 01-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 01.598.082l1.584.926a.272.272 0 00.14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 01-.023-.156.49.49 0 01.201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.269-.03-.406-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 01-.969.983.976.976 0 01-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 01-.969.983.976.976 0 01-.969-.983c0-.542.434-.982.969-.982z"/>
+        </svg>
+        <span>复制微信号</span>
+      </button>
+
+      <a href="https://github.com/" class="link-btn" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+        </svg>
+        <span class="link-text">GitHub</span>
+      </a>
+
+      <a href="https://twitter.com/" class="link-btn" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+        </svg>
+        <span class="link-text">Twitter / X</span>
+      </a>
+
+      <a href="https://youtube.com/" class="link-btn" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+        </svg>
+        <span class="link-text">YouTube</span>
+      </a>
+
+      <a href="https://space.bilibili.com/3363942?spm_id_from=333.40164.0.0" class="link-btn" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.858 0 17.347v-7.36c.036-1.511.556-2.765 1.56-3.76 1.004-.996 2.262-1.52 3.773-1.574h.774l-1.174-1.12a1.234 1.234 0 0 1-.373-.906c0-.356.124-.659.373-.907l.027-.027c.267-.249.573-.373.92-.373.347 0 .653.124.92.373L9.653 4.44c.071.071.134.142.187.213h4.267a.836.836 0 0 1 .16-.213l2.853-2.747c.267-.249.573-.373.92-.373.347 0 .662.151.929.4.267.249.391.551.391.907 0 .355-.124.657-.373.906L17.813 4.653zM5.333 7.24c-.746.018-1.373.276-1.88.773-.506.498-.769 1.13-.786 1.894v7.52c.017.764.28 1.395.786 1.893.507.498 1.134.756 1.88.773h13.334c.746-.017 1.373-.275 1.88-.773.506-.498.769-1.129.786-1.893v-7.52c-.017-.765-.28-1.396-.786-1.894-.507-.497-1.134-.755-1.88-.773H5.333zM8 11.107c.373 0 .684.124.933.373.25.249.383.569.4.96v1.173c-.017.391-.15.711-.4.96-.249.25-.56.374-.933.374s-.684-.125-.933-.374c-.25-.249-.383-.569-.4-.96V12.44c0-.373.129-.689.386-.947.258-.257.574-.386.947-.386zm8 0c.373 0 .684.129.933.386.25.258.383.574.4.947v1.173c-.017.391-.15.711-.4.96-.249.249-.56.373-.933.373s-.684-.124-.933-.373c-.25-.249-.383-.569-.4-.96V12.44c.017-.391.15-.711.4-.96.249-.249.56-.373.933-.373z"/>
+        </svg>
+        <span class="link-text">Bilibili</span>
+      </a>
+
+      <a href="mailto:example@email.com" class="link-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="4" width="20" height="16" rx="2"/>
+          <path d="M22 6l-10 7L2 6"/>
+        </svg>
+        <span class="link-text">Email</span>
+      </a>
+    </nav>
+  </main>
+
+  <!-- Visit Counter -->
+  <div class="visit-counter" id="visitCounter">访问次数: 0</div>
+
+  <script>
+    // ========== Sakura Petal Animation ==========
+    (function() {
+      const petalCount = 18;
+      const container = document.getElementById('sakura');
+
+      for (let i = 0; i < petalCount; i++) {
+        const petal = document.createElement('div');
+        petal.className = 'sakura-petal';
+
+        // Random properties for natural variation (larger petals 20-35px)
+        const size = 20 + Math.random() * 15;
+        const left = Math.random() * 100;
+        const duration = 8 + Math.random() * 7;
+        const delay = Math.random() * 10;
+        const swayAmount = 10 + Math.random() * 20;
+
+        petal.style.cssText = [
+          `left: ${left}%`,
+          `width: ${size}px`,
+          `height: ${size}px`,
+          `animation-duration: ${duration}s`,
+          `animation-delay: ${delay}s`,
+          `--sway-amount: ${swayAmount}px`
+        ].join(';');
+
+        // Add horizontal sway
+        petal.style.animation += `, sway ${3 + Math.random() * 2}s ease-in-out infinite`;
+        petal.style.animationDelay = `${delay}s, ${delay}s`;
+
+        container.appendChild(petal);
+      }
+
+      // Insert sway keyframes dynamically
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes sway {
+          0%, 100% { transform: translateX(0); }
+          50% { transform: translateX(var(--sway-amount, 30px)); }
+        }
+      `;
+      document.head.appendChild(style);
+    })();
+
+    // ========== Theme Toggle ==========
+    (function() {
+      const themeToggle = document.getElementById('themeToggle');
+      const body = document.body;
+
+      // Load saved theme
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      if (savedTheme === 'dark') {
+        body.setAttribute('data-theme', 'dark');
+        themeToggle.textContent = '☾';
+      }
+
+      themeToggle.addEventListener('click', function() {
+        const currentTheme = body.getAttribute('data-theme');
+        if (currentTheme === 'dark') {
+          body.removeAttribute('data-theme');
+          themeToggle.textContent = '☀';
+          localStorage.setItem('theme', 'light');
+        } else {
+          body.setAttribute('data-theme', 'dark');
+          themeToggle.textContent = '☾';
+          localStorage.setItem('theme', 'dark');
+        }
+      });
+    })();
+
+    // ========== Visit Counter ==========
+    (function() {
+      const counter = document.getElementById('visitCounter');
+      let count = parseInt(localStorage.getItem('visitCount') || '0', 10);
+      count++;
+      localStorage.setItem('visitCount', count.toString());
+      counter.textContent = '访问次数: ' + count;
+    })();
+
+    // ========== WeChat Copy ==========
+    (function() {
+      const wechatBtn = document.getElementById('wechatCopy');
+      const toast = document.getElementById('toast');
+      const wechatId = '18622859870';
+
+      wechatBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(wechatId).then(function() {
+          toast.classList.add('show');
+          setTimeout(function() {
+            toast.classList.remove('show');
+          }, 2000);
+        }).catch(function() {
+          toast.textContent = '复制失败，请手动复制';
+          toast.classList.add('show');
+          setTimeout(function() {
+            toast.classList.remove('show');
+            toast.textContent = '已复制 ✓';
+          }, 2000);
+        });
+      });
+    })();
+
+    // ========== Background Music ==========
+    (function() {
+      const musicControl = document.getElementById('musicControl');
+      const bgMusic = document.getElementById('bgMusic');
+
+      // Start muted
+      bgMusic.muted = true;
+
+      let isPlaying = false;
+
+      musicControl.addEventListener('click', function() {
+        if (isPlaying) {
+          bgMusic.pause();
+          musicControl.textContent = '▶';
+          isPlaying = false;
+        } else {
+          bgMusic.muted = false;
+          bgMusic.play().catch(function() {});
+          musicControl.textContent = '⏸';
+          isPlaying = true;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

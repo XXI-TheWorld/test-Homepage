@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip show:*)",
+      "Bash(openspec init:*)",
+      "Bash(curl -sI \"https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap\")",
+      "Bash(npx -y playwright@latest test --version)",
+      "Bash(npm install:*)",
+      "Bash(npx playwright:*)",
+      "Bash(node:*)",
+      "Bash(npm init:*)",
+      "Bash(openspec new:*)",
+      "Bash(openspec status:*)",
+      "Bash(openspec instructions:*)"
+    ]
+  }
+}
