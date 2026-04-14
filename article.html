@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文章 - LinkPage</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #FFFFFF;
+      --text-primary: #1A1A1A;
+      --text-secondary: #666666;
+      --border: #E0E0E0;
+      --hover-bg: #F5F5F5;
+      /* Wood-grain colors */
+      --wood-dark: #6B5344;
+      --wood-main: #8B7355;
+      --wood-light: #A08060;
+      /* Gold accent */
+      --gold: #D4AF37;
+      /* Like color */
+      --like-color: #e53935;
+      /* Dark mode colors */
+      --bg-dark: #1A1A1A;
+      --text-primary-dark: #F5F5F5;
+      --text-secondary-dark: #999999;
+      --border-dark: #333333;
+      --hover-bg-dark: #2A2A2A;
+    }
+
+    [data-theme="dark"] {
+      --bg: var(--bg-dark);
+      --text-primary: var(--text-primary-dark);
+      --text-secondary: var(--text-secondary-dark);
+      --border: var(--border-dark);
+      --hover-bg: var(--hover-bg-dark);
+    }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-weight: 400;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      transition: background-color 0.3s, color 0.3s;
+      position: relative;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Theme Toggle Button */
+    .theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      transition: all 0.3s;
+      z-index: 100;
+    }
+
+    .theme-toggle:hover {
+      background: var(--hover-bg);
+    }
+
+    /* Back Link */
+    .back-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: color 0.3s;
+    }
+
+    .back-link:hover {
+      color: var(--text-primary);
+    }
+
+    .back-link svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Article Card */
+    .article-card {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 20px;
+      background: var(--bg);
+      border: 2px solid transparent;
+      background:
+        linear-gradient(var(--bg), var(--bg)) padding-box,
+        linear-gradient(90deg, var(--wood-dark), var(--wood-main), var(--wood-light), var(--wood-main), var(--wood-dark)) border-box;
+      border-radius: 4px;
+    }
+
+    /* Article Header */
+    .article-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .article-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 400;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .article-meta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .article-nickname {
+      font-size: 0.875rem;
+      font-weight: 400;
+      margin-bottom: 2px;
+    }
+
+    .article-time {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    /* Article Actions */
+    .article-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    .action-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .action-btn:hover {
+      background: var(--hover-bg);
+      color: var(--text-primary);
+    }
+
+    .action-btn.liked {
+      color: var(--like-color);
+    }
+
+    .action-btn.liked svg {
+      fill: var(--like-color);
+    }
+
+    .action-btn.delete {
+      color: var(--text-secondary);
+    }
+
+    .action-btn.delete:hover {
+      color: var(--like-color);
+    }
+
+    .action-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Article Title */
+    .article-title {
+      font-size: 1.25rem;
+      font-weight: 400;
+      line-height: 1.4;
+    }
+
+    .article-category-tag {
+      font-size: 0.625rem;
+      padding: 2px 6px;
+      background: var(--wood-main);
+      color: #fff;
+      border-radius: 4px;
+      vertical-align: middle;
+    }
+
+    /* Article Body */
+    .article-body {
+      font-size: 0.9375rem;
+      font-weight: 300;
+      line-height: 1.8;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+
+    /* Comments Section */
+    .comments-section {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .comments-header {
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--text-primary);
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .comments-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .comment-item {
+      display: flex;
+      gap: 12px;
+      padding: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+    }
+
+    .comment-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .comment-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .comment-header {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .comment-nickname {
+      font-size: 0.8125rem;
+      font-weight: 400;
+    }
+
+    .comment-time {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .comment-message {
+      font-size: 0.875rem;
+      font-weight: 300;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .comment-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    .comment-action-btn {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .comment-action-btn:hover {
+      background: var(--hover-bg);
+      color: var(--text-primary);
+    }
+
+    .comment-action-btn.liked {
+      color: var(--like-color);
+    }
+
+    .comment-action-btn.liked svg {
+      fill: var(--like-color);
+    }
+
+    .comment-action-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Empty Comments */
+    .empty-comments {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+
+    /* Comment Form */
+    .comment-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 16px;
+      background: var(--bg);
+      border: 2px solid transparent;
+      background:
+        linear-gradient(var(--bg), var(--bg)) padding-box,
+        linear-gradient(90deg, var(--wood-dark), var(--wood-main), var(--wood-light), var(--wood-main), var(--wood-dark)) border-box;
+      border-radius: 4px;
+    }
+
+    .comment-form-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .guest-identity {
+      padding: 10px;
+      background: var(--hover-bg);
+      border-radius: 4px;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    .modify-id-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-left: 8px;
+    }
+
+    .modify-id-btn:hover {
+      background: var(--hover-bg);
+      color: var(--text-primary);
+    }
+
+    .admin-login-btn, .admin-logout-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-left: 8px;
+    }
+
+    .admin-login-btn:hover {
+      background: var(--hover-bg);
+      color: var(--text-primary);
+    }
+
+    .admin-logout-btn:hover {
+      background: var(--hover-bg);
+      color: var(--text-primary);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.875rem;
+      transition: border-color 0.3s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--wood-main);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-secondary);
+    }
+
+    textarea.form-input {
+      min-height: 60px;
+      resize: vertical;
+    }
+
+    .form-error {
+      color: #e53935;
+      font-size: 0.75rem;
+    }
+
+    .submit-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 16px;
+      background: var(--wood-main);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .submit-btn:hover {
+      background: var(--wood-dark);
+    }
+
+    .submit-btn:active {
+      transform: scale(0.98);
+    }
+
+    .submit-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Not Found State */
+    .not-found {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 64px 16px;
+      text-align: center;
+      color: var(--text-secondary);
+    }
+
+    .not-found .icon {
+      font-size: 4rem;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .not-found h2 {
+      font-size: 1.25rem;
+      font-weight: 400;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .not-found p {
+      font-size: 0.875rem;
+      margin-bottom: 24px;
+    }
+
+    .not-found .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      background: var(--wood-main);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 4px;
+      font-size: 0.9375rem;
+      transition: background-color 0.3s;
+    }
+
+    .not-found .back-btn:hover {
+      background: var(--wood-dark);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.visible {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--bg);
+      padding: 24px;
+      border-radius: 8px;
+      max-width: 320px;
+      width: 90%;
+    }
+
+    .modal h3 {
+      font-size: 1rem;
+      font-weight: 400;
+      margin-bottom: 12px;
+    }
+
+    .modal p {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.875rem;
+      margin-bottom: 12px;
+    }
+
+    .modal-input:focus {
+      outline: none;
+      border-color: var(--wood-main);
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .modal-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .modal-btn.cancel {
+      background: var(--hover-bg);
+      color: var(--text-primary);
+    }
+
+    .modal-btn.cancel:hover {
+      background: var(--border);
+    }
+
+    .modal-btn.confirm {
+      background: var(--like-color);
+      color: #fff;
+    }
+
+    .modal-btn.confirm:hover {
+      background: #c62828;
+    }
+
+    .modal-error {
+      color: #e53935;
+      font-size: 0.75rem;
+      margin-bottom: 8px;
+    }
+
+    @media (min-width: 768px) {
+      body {
+        padding: 48px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    ☀
+  </button>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal">
+      <h3 id="modalTitle">确认删除</h3>
+      <p id="modalMessage">确定要删除这篇文章吗？</p>
+      <span class="modal-error" id="modalError"></span>
+      <div class="modal-buttons">
+        <button class="modal-btn cancel" id="modalCancel">取消</button>
+        <button class="modal-btn confirm" id="modalConfirm">删除</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="container">
+    <a href="comments.html" class="back-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      返回文章列表
+    </a>
+
+    <div class="not-found" id="notFound">
+      <div class="icon">😕</div>
+      <h2>文章不存在或已被删除</h2>
+      <p>该文章可能已失效或被移除</p>
+      <a href="comments.html" class="back-btn">返回文章列表</a>
+    </div>
+
+    <article class="article-card" id="articleCard" style="display: none;">
+      <div class="article-header">
+        <div class="article-avatar" id="articleAvatar"></div>
+        <div class="article-meta">
+          <div class="article-nickname" id="articleNickname"></div>
+          <div class="article-time" id="articleTime"></div>
+        </div>
+      </div>
+      <h1 class="article-title" id="articleTitle"></h1>
+      <div class="article-body" id="articleBody"></div>
+      <div class="article-actions">
+        <button class="action-btn like-btn" id="articleLikeBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          <span id="articleLikeCount">赞</span>
+        </button>
+        <button class="action-btn share-btn" onclick="shareArticle()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/>
+          </svg>
+          转发
+        </button>
+        <button class="action-btn delete" id="articleDeleteBtn" style="display: none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+          </svg>
+          删除
+        </button>
+      </div>
+    </article>
+
+    <section class="comments-section" id="commentsSection" style="display: none;">
+      <div class="comments-header">评论</div>
+      <div class="comments-list" id="commentsList">
+        <div class="empty-comments" id="emptyComments">还没有评论</div>
+      </div>
+      <form class="comment-form" id="commentForm">
+        <div class="guest-identity" id="guestIdentity"></div>
+        <button type="button" class="modify-id-btn" onclick="modifyGuestId()">修改身份</button>
+        <textarea class="form-input" id="commentMessage" placeholder="写下你的评论..." maxlength="500"></textarea>
+        <span class="form-error" id="commentError"></span>
+        <button type="submit" class="submit-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+          </svg>
+          发布评论
+        </button>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    // ========== Theme Toggle ==========
+    (function() {
+      const themeToggle = document.getElementById('themeToggle');
+      const body = document.body;
+
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      if (savedTheme === 'dark') {
+        body.setAttribute('data-theme', 'dark');
+        themeToggle.textContent = '☾';
+      }
+
+      themeToggle.addEventListener('click', function() {
+        const currentTheme = body.getAttribute('data-theme');
+        if (currentTheme === 'dark') {
+          body.removeAttribute('data-theme');
+          themeToggle.textContent = '☀';
+          localStorage.setItem('theme', 'light');
+        } else {
+          body.setAttribute('data-theme', 'dark');
+          themeToggle.textContent = '☾';
+          localStorage.setItem('theme', 'dark');
+        }
+      });
+    })();
+
+    // ========== Time Formatting ==========
+    function formatTime(timestamp) {
+      const now = Date.now();
+      const diff = now - timestamp;
+      const minute = 60 * 1000;
+      const hour = 60 * minute;
+      const day = 24 * hour;
+
+      if (diff < minute) {
+        return '刚刚';
+      } else if (diff < hour) {
+        const mins = Math.floor(diff / minute);
+        return mins + '分钟前';
+      } else if (diff < day) {
+        const hours = Math.floor(diff / hour);
+        return hours + '小时前';
+      } else if (diff < 7 * day) {
+        const days = Math.floor(diff / day);
+        return days + '天前';
+      } else {
+        const date = new Date(timestamp);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const dayStr = String(date.getDate()).padStart(2, '0');
+        return year + '-' + month + '-' + dayStr;
+      }
+    }
+
+    // ========== Guest ID ==========
+    function generateGuestId() {
+      return Math.floor(1000 + Math.random() * 9000).toString();
+    }
+
+    function getGuestId() {
+      let guestId = localStorage.getItem('guest_id');
+      if (!guestId) {
+        guestId = generateGuestId();
+        localStorage.setItem('guest_id', guestId);
+      }
+      return guestId;
+    }
+
+    function isGuestIdInUse(newId) {
+      const articles = getArticles();
+      for (let i = 0; i < articles.length; i++) {
+        if (articles[i].nickname === newId) {
+          return true;
+        }
+        if (articles[i].comments) {
+          for (let j = 0; j < articles[i].comments.length; j++) {
+            if (articles[i].comments[j].nickname === newId) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    }
+
+    // ========== Admin Mode ==========
+    const ADMIN_CODE = 'admin123';
+
+    function isAdmin() {
+      return localStorage.getItem('admin_logged_in') === 'true';
+    }
+
+    function loginAdmin() {
+      const code = prompt('请输入管理员激活暗号：');
+      if (code === null) return;
+      if (code === ADMIN_CODE) {
+        localStorage.setItem('admin_logged_in', 'true');
+        updateGuestIdentityDisplay();
+        renderComments(getArticle(getQueryParam('id')));
+        alert('管理员模式已激活');
+      } else {
+        alert('激活码错误');
+      }
+    }
+
+    function logoutAdmin() {
+      localStorage.removeItem('admin_logged_in');
+      updateGuestIdentityDisplay();
+      renderComments(getArticle(getQueryParam('id')));
+      alert('已退出管理员模式');
+    }
+
+    function updateGuestIdentityDisplay() {
+      const guestIdentity = document.getElementById('guestIdentity');
+      if (isAdmin()) {
+        guestIdentity.innerHTML = '当前身份：<span style="color:#e53935;font-weight:bold;">管理员</span> <button type="button" class="admin-logout-btn" onclick="logoutAdmin()">退出</button>';
+      } else {
+        guestIdentity.innerHTML = '当前身份：' + escapeHtml(getGuestId()) + ' <button type="button" class="modify-id-btn" onclick="modifyGuestId()">修改身份</button> <button type="button" class="admin-login-btn" onclick="loginAdmin()">管理员登录</button>';
+      }
+    }
+
+    function modifyGuestId() {
+      const newId = prompt('请输入新的身份名称（最多15个中/英文字符）：');
+      if (newId === null) return;
+      const trimmedId = newId.trim();
+      if (trimmedId.length < 1 || trimmedId.length > 15) {
+        alert('身份名称需要在1-15个字符之间');
+        return;
+      }
+      if (isGuestIdInUse(trimmedId)) {
+        alert('该名称已被占用');
+        return;
+      }
+      localStorage.setItem('guest_id', trimmedId);
+      updateGuestIdentityDisplay();
+      alert('身份已修改为：' + trimmedId);
+      // Refresh article and comments to update UI
+      const articleId = getQueryParam('id');
+      const article = getArticle(articleId);
+      if (article) {
+        renderComments(article);
+        updateArticleLikeUI(article);
+      }
+    }
+
+    // ========== Avatar Generation ==========
+    function generateAvatar(nickname) {
+      const colors = [
+        '#e57373', '#f06292', '#ba68c8', '#9575cd',
+        '#7986cb', '#64b5f6', '#4fc3f7', '#4dd0e1',
+        '#4db6ac', '#81c784', '#aed581', '#dce775',
+        '#ffd54f', '#ffb74d', '#ff8a65', '#a1887f'
+      ];
+
+      let hash = 0;
+      for (let i = 0; i < nickname.length; i++) {
+        hash = nickname.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      const colorIndex = Math.abs(hash) % colors.length;
+      const displayChar = nickname.charAt(0).toUpperCase();
+
+      return { char: displayChar, color: colors[colorIndex] };
+    }
+
+    // ========== localStorage Functions ==========
+    function getArticles() {
+      const data = localStorage.getItem('visitorArticles');
+      return data ? JSON.parse(data) : [];
+    }
+
+    function saveArticles(articles) {
+      localStorage.setItem('visitorArticles', JSON.stringify(articles));
+    }
+
+    function getArticle(id) {
+      const articles = getArticles();
+      return articles.find(function(article) {
+        return article.id === id;
+      });
+    }
+
+    function updateArticle(updatedArticle) {
+      const articles = getArticles();
+      const index = articles.findIndex(function(a) {
+        return a.id === updatedArticle.id;
+      });
+      if (index !== -1) {
+        articles[index] = updatedArticle;
+        saveArticles(articles);
+      }
+    }
+
+    function deleteArticle(id) {
+      const articles = getArticles();
+      const filtered = articles.filter(function(a) {
+        return a.id !== id;
+      });
+      saveArticles(filtered);
+    }
+
+    // ========== Modal Functions ==========
+    let currentDeleteTarget = null;
+
+    function showDeleteModal(type, id) {
+      currentDeleteTarget = { type: type, id: id };
+      const modal = document.getElementById('deleteModal');
+      const title = document.getElementById('modalTitle');
+      const message = document.getElementById('modalMessage');
+      const error = document.getElementById('modalError');
+
+      error.textContent = '';
+
+      if (type === 'article') {
+        title.textContent = '删除文章';
+        message.textContent = '确定要删除这篇文章吗？';
+      } else {
+        title.textContent = '删除评论';
+        message.textContent = '确定要删除这条评论吗？';
+      }
+
+      modal.classList.add('visible');
+    }
+
+    function hideDeleteModal() {
+      currentDeleteTarget = null;
+      document.getElementById('deleteModal').classList.remove('visible');
+    }
+
+    document.getElementById('modalCancel').addEventListener('click', hideDeleteModal);
+
+    document.getElementById('modalConfirm').addEventListener('click', function() {
+      const error = document.getElementById('modalError');
+      const nickname = getGuestId();
+
+      if (!currentDeleteTarget) return;
+
+      if (currentDeleteTarget.type === 'article') {
+        const article = getArticle(currentDeleteTarget.id);
+        if (!article) {
+          error.textContent = '文章不存在';
+          return;
+        }
+        if (article.nickname !== nickname) {
+          error.textContent = '无法删除：这不是你的文章';
+          return;
+        }
+        deleteArticle(currentDeleteTarget.id);
+        hideDeleteModal();
+        window.location.href = 'comments.html';
+      } else if (currentDeleteTarget.type === 'comment') {
+        const article = getArticle(currentDeleteTarget.id.articleId);
+        if (!article || !article.comments) {
+          error.textContent = '评论不存在';
+          return;
+        }
+        const commentIndex = article.comments.findIndex(function(c) {
+          return c.id === currentDeleteTarget.id.commentId;
+        });
+        if (commentIndex === -1) {
+          error.textContent = '评论不存在';
+          return;
+        }
+        const comment = article.comments[commentIndex];
+        if (comment.nickname !== nickname) {
+          error.textContent = '无法删除：这不是你的评论';
+          return;
+        }
+        article.comments.splice(commentIndex, 1);
+        updateArticle(article);
+        hideDeleteModal();
+        renderComments(article);
+      }
+    });
+
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        hideDeleteModal();
+      }
+    });
+
+    // ========== Share Function ==========
+    function shareArticle() {
+      const articleId = getQueryParam('id');
+      const url = window.location.origin + window.location.pathname + '?id=' + articleId;
+      const shareText = '快来看看这篇文章写的如何~ ' + url;
+      navigator.clipboard.writeText(shareText).then(function() {
+        alert('链接已复制');
+      }).catch(function() {
+        alert('链接已复制');
+      });
+    }
+
+    // ========== Like Functions ==========
+    function toggleLike(articleId, commentId) {
+      const article = getArticle(articleId);
+      if (!article) return;
+
+      const nickname = isAdmin() ? '管理员' : getGuestId();
+
+      if (!commentId) {
+        // Like article
+        if (!article.likes) article.likes = [];
+        const likeIndex = article.likes.indexOf(nickname);
+        if (likeIndex === -1) {
+          article.likes.push(nickname);
+        } else {
+          article.likes.splice(likeIndex, 1);
+        }
+        updateArticle(article);
+        updateArticleLikeUI(article);
+      } else {
+        // Like comment
+        if (!article.comments) return;
+        const comment = article.comments.find(function(c) {
+          return c.id === commentId;
+        });
+        if (!comment) return;
+        if (!comment.likes) comment.likes = [];
+        const likeIndex = comment.likes.indexOf(nickname);
+        if (likeIndex === -1) {
+          comment.likes.push(nickname);
+        } else {
+          comment.likes.splice(likeIndex, 1);
+        }
+        updateArticle(article);
+        renderComments(article);
+      }
+    }
+
+    function updateArticleLikeUI(article) {
+      const nickname = isAdmin() ? '管理员' : getGuestId();
+      const likeBtn = document.getElementById('articleLikeBtn');
+      const likeCount = document.getElementById('articleLikeCount');
+
+      const isLiked = article.likes && article.likes.includes(nickname);
+      likeBtn.classList.toggle('liked', isLiked);
+
+      const count = article.likes ? article.likes.length : 0;
+      likeCount.textContent = count > 0 ? '赞 ' + count : '赞';
+    }
+
+    // ========== Render Comments ==========
+    function renderComments(article) {
+      const commentsList = document.getElementById('commentsList');
+      const emptyComments = document.getElementById('emptyComments');
+      const nickname = getGuestId();
+      const adminMode = isAdmin();
+
+      // Remove existing comment items
+      const existingItems = commentsList.querySelectorAll('.comment-item');
+      existingItems.forEach(function(item) {
+        item.remove();
+      });
+
+      if (!article.comments || article.comments.length === 0) {
+        emptyComments.style.display = 'block';
+        return;
+      }
+
+      emptyComments.style.display = 'none';
+
+      // Sort comments by timestamp (oldest first)
+      const sortedComments = article.comments.slice().sort(function(a, b) {
+        return a.timestamp - b.timestamp;
+      });
+
+      sortedComments.forEach(function(comment) {
+        const avatar = generateAvatar(comment.nickname);
+        const isLiked = comment.likes && comment.likes.includes(nickname);
+        const canDelete = adminMode || (nickname && comment.nickname === nickname);
+        const displayNickname = adminMode ? '<span style="color:#e53935;font-weight:bold;">管理员</span>' : escapeHtml(comment.nickname);
+
+        const itemEl = document.createElement('div');
+        itemEl.className = 'comment-item';
+
+        itemEl.innerHTML =
+          '<div class="comment-avatar" style="background-color:' + avatar.color + '">' + avatar.char + '</div>' +
+          '<div class="comment-content">' +
+            '<div class="comment-header">' +
+              '<span class="comment-nickname">' + displayNickname + '</span>' +
+              '<span class="comment-time">' + formatTime(comment.timestamp) + '</span>' +
+            '</div>' +
+            '<div class="comment-message">' + escapeHtml(comment.content) + '</div>' +
+            '<div class="comment-actions">' +
+              '<button class="comment-action-btn ' + (isLiked ? 'liked' : '') + '" onclick="toggleLike(\'' + article.id + '\', \'' + comment.id + '\')">' +
+                '<svg viewBox="0 0 24 24" fill="' + (isLiked ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="2">' +
+                  '<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>' +
+                '</svg>' +
+                '<span>' + ((comment.likes && comment.likes.length > 0) ? comment.likes.length : '') + '</span>' +
+              '</button>' +
+              (canDelete ?
+                '<button class="comment-action-btn delete" onclick="' + (adminMode ? 'adminDeleteComment' : 'showDeleteModal') + '(\'' + article.id + '\', \'' + comment.id + '\')">' +
+                  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                    '<path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>' +
+                  '</svg>删除' +
+                '</button>' : '') +
+            '</div>' +
+          '</div>';
+
+        commentsList.appendChild(itemEl);
+      });
+    }
+
+    function adminDeleteComment(articleId, commentId) {
+      const article = getArticle(articleId);
+      if (!article || !article.comments) return;
+      const commentIndex = article.comments.findIndex(function(c) {
+        return c.id === commentId;
+      });
+      if (commentIndex === -1) return;
+      if (confirm('确定删除这条评论吗？')) {
+        article.comments.splice(commentIndex, 1);
+        updateArticle(article);
+        renderComments(article);
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // ========== Comment Form ==========
+    (function() {
+      const form = document.getElementById('commentForm');
+      const guestIdentity = document.getElementById('guestIdentity');
+      const messageInput = document.getElementById('commentMessage');
+      const errorSpan = document.getElementById('commentError');
+
+      // Initialize guest identity display
+      updateGuestIdentityDisplay();
+
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const message = messageInput.value.trim();
+
+        if (!message) {
+          errorSpan.textContent = '请输入评论内容';
+          return;
+        }
+
+        const articleId = getQueryParam('id');
+        const article = getArticle(articleId);
+
+        if (!article) {
+          errorSpan.textContent = '文章不存在';
+          return;
+        }
+
+        if (!article.comments) article.comments = [];
+
+        const comment = {
+          id: Date.now().toString(),
+          nickname: isAdmin() ? '管理员' : getGuestId(),
+          content: message,
+          timestamp: Date.now(),
+          likes: []
+        };
+
+        article.comments.push(comment);
+        updateArticle(article);
+
+        messageInput.value = '';
+        renderComments(article);
+        updateArticleLikeUI(article);
+      });
+    })();
+
+    // ========== Parse URL Parameters ==========
+    function getQueryParam(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+
+    // ========== Render Article ==========
+    (function() {
+      const articleId = getQueryParam('id');
+      const articleCard = document.getElementById('articleCard');
+      const notFound = document.getElementById('notFound');
+      const commentsSection = document.getElementById('commentsSection');
+      const articleLikeBtn = document.getElementById('articleLikeBtn');
+      const articleDeleteBtn = document.getElementById('articleDeleteBtn');
+
+      if (!articleId) {
+        articleCard.style.display = 'none';
+        commentsSection.style.display = 'none';
+        notFound.style.display = 'flex';
+        return;
+      }
+
+      const article = getArticle(articleId);
+
+      if (!article) {
+        articleCard.style.display = 'none';
+        commentsSection.style.display = 'none';
+        notFound.style.display = 'flex';
+        return;
+      }
+
+      // Update page title
+      document.title = article.title + ' - LinkPage';
+
+      // Initialize likes array
+      if (!article.likes) article.likes = [];
+
+      // Render article
+      document.getElementById('articleAvatar').style.backgroundColor = article.avatarColor || '#8B7355';
+      document.getElementById('articleAvatar').textContent = article.avatarChar || article.nickname.charAt(0).toUpperCase();
+      document.getElementById('articleNickname').textContent = article.nickname;
+      document.getElementById('articleTime').textContent = formatTime(article.timestamp);
+      const titleEl = document.getElementById('articleTitle');
+      if (article.category && article.category !== '无') {
+        titleEl.innerHTML = '<span class="article-category-tag">' + escapeHtml(article.category) + '</span> ' + escapeHtml(article.title);
+      } else {
+        titleEl.textContent = article.title;
+      }
+      document.getElementById('articleBody').textContent = article.body;
+
+      // Article like button
+      articleLikeBtn.addEventListener('click', function() {
+        toggleLike(article.id, null);
+      });
+
+      // Article delete button
+      const nickname = getGuestId();
+      const adminMode = isAdmin();
+      if (adminMode || (nickname && nickname === article.nickname)) {
+        articleDeleteBtn.style.display = 'flex';
+        articleDeleteBtn.addEventListener('click', function() {
+          if (adminMode) {
+            if (confirm('确定删除这篇文章吗？')) {
+              deleteArticle(article.id);
+              window.location.href = 'comments.html';
+            }
+          } else {
+            showDeleteModal('article', article.id);
+          }
+        });
+      }
+
+      // Show article and comments
+      articleCard.style.display = 'flex';
+      commentsSection.style.display = 'flex';
+      notFound.style.display = 'none';
+
+      // Render comments
+      renderComments(article);
+      updateArticleLikeUI(article);
+    })();
+  </script>
+</body>
+</html>
